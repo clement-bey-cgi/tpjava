@@ -3,10 +3,12 @@ package com.ipiecoles.java.java320.controller;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import com.ipiecoles.java.java320.model.Commercial;
@@ -30,7 +32,7 @@ public class CommercialController {
 	public String createCommercial(Map<String, Object> model, HttpServletRequest request) {
 		String nom = (String) request.getParameter("nom");
 		String prenom = (String) request.getParameter("prenom");
-		Double salaire = (Double)Double.parseDouble(request.getParameter("salaire"));
+		Double salaire = Double.parseDouble(request.getParameter("salaire"));
 		String matricule = (String) request.getParameter("matricule");
 		LocalDate dateEmbauche = LocalDate.parse(request.getParameter("dateEmbauche"));
 
@@ -45,4 +47,21 @@ public class CommercialController {
 		return "index";
 	}
 	
+	@RequestMapping(value="/{id}", method = RequestMethod.POST)
+	public void modifyCommercial(@PathVariable("id") Long id, HttpServletRequest request, HttpServletResponse response, Map<String,Object> model) throws Exception {
+		model.put("nombreEmployes", employeService.countAllEmploye());
+		
+		Commercial actualCommercial = commercialService.findById(id);
+		actualCommercial.setCaAnnuel(Double.parseDouble(request.getParameter("caAnnuel")));
+		actualCommercial.setDateEmbauche(LocalDate.parse(request.getParameter("dateEmbauche")));
+		actualCommercial.setMatricule(request.getParameter("matricule"));
+		actualCommercial.setNom(request.getParameter("nom"));
+		actualCommercial.setPerformance(Integer.valueOf(request.getParameter("performance")));
+		actualCommercial.setPrenom(request.getParameter("prenom"));
+		actualCommercial.setSalaire(Double.parseDouble(request.getParameter("salaire")));
+		
+		Commercial modifiedCommercial = commercialService.updateEmploye(id, actualCommercial);
+		
+		response.sendRedirect("http://localhost:8080/employes/"+id);
+	}
 }

@@ -10,13 +10,30 @@
     		${ consultedEmployee.matricule }</h2>
     </c:if>
 
-
     <div class="row">
         <form id="saveForm" 
         	<c:choose>
-        	 	<c:when test="${ commercialCreationMode =='enabled' }">action="http://localhost:8080/commercials/save" </c:when>
-        	 	<c:when test="${ managerCreationMode =='enabled' }">action="http://localhost:8080/managers/save" </c:when>
-        	 	<c:when test="${ technicianCreationMode =='enabled' }">action="http://localhost:8080/techniciens/save" </c:when>
+        	 	<c:when test="${ commercialCreationMode =='enabled' }">
+        	 		action="http://localhost:8080/commercials/save"
+        	 	</c:when>
+        	 	<c:when test="${ managerCreationMode =='enabled' }">
+        	 		action="http://localhost:8080/managers/save"
+        	 	</c:when>
+        	 	<c:when test="${ technicianCreationMode =='enabled' }">
+        	 		action="http://localhost:8080/techniciens/save" 
+        	 	</c:when>
+        	 	<c:when test="${ technicianCreationMode =='enabled' }">
+        	 		action="http://localhost:8080/techniciens/save" 
+        	 	</c:when>        	 
+        	 	<c:when test="${ employeeJob == 'com' && commercialCreationMode != 'enabled' }">
+        	 		action="http://localhost:8080/commercials/${ consultedEmployee.getId()}" 
+        	 	</c:when>   
+        	 	<c:when test="${ employeeJob == 'tec' && technicianCreationMode != 'enabled' }">
+        	 		action="http://localhost:8080/techniciens/${ consultedEmployee.getId()}" 
+        	 	</c:when>
+        	 	<c:when test="${ employeeJob == 'man' && managerCreationMode != 'enabled' }">
+        	 		action="http://localhost:8080/managers/${ consultedEmployee.getId()}" 
+        	 	</c:when>        	 	         	 	         	 		
         	 </c:choose>
         method="post">
         <div class="col-lg-6">
@@ -61,7 +78,7 @@
 	                </div>
                 </c:if>
 
-				<c:if test="${ employeeJob == 'tec'}">
+				<c:if test="${ employeeJob == 'tec' || technicianCreationMode == 'enabled'}">
 	                <label class="form-control-label" for="grade">Grade</label>
 	                <input type="number" value="${ consultedEmployee.grade }" class="form-control" name="grade" id="grade">
 				</c:if>
@@ -73,12 +90,20 @@
                 <div class="row">
                     <div class="col-lg-10">
                         <ul class="list-group">
-                                <li class="list-group-item"><a href="http://localhost:8080/employes/${managedEmployee.id}">${managedEmployee.nom} ${managedEmployee.prenom} <span class="badge pull-right">${managedEmployee.matricule}</span></a></li>
+                                <li class="list-group-item">
+                                	<a href="http://localhost:8080/employes/${managedEmployee.id}">${managedEmployee.nom} ${managedEmployee.prenom} 
+                                		<span class="badge pull-right">${managedEmployee.matricule}</span>
+                                	</a>
+                                </li>
                         </ul>
                     </div>
                     <div class="col-lg-2 text-center">
                         <div class="list-group text-center">
-                                <li class="list-group-item"><a href=""><span class="glyphicon glyphicon-remove"></span></a></li>
+                                <li class="list-group-item">
+                                	<a href="http://localhost:8080/techniciens/${ managedEmployee.id }/removemanager/${ requestScope.consultedEmployee.getId() }">
+                                		<span class="glyphicon glyphicon-remove"></span>
+                                	</a>
+                                </li>
                         </div>
                     </div>
                 </div>
@@ -91,7 +116,7 @@
         <div class="col-lg-6">
         
         	<c:if test="${ employeeJob == 'man' && consultationMode == 'enabled' }">
-            <form action="" method="get">
+            <form action="http://localhost:8080/managers/${ requestScope.consultedEmployee.getId() }/addtechnicien" method="get">
                 <div class="col-lg-10">
                     <input type="text" name="matricule" value="" placeholder="Ajouter un technicien avec le matricule..." class="form-control">
                 </div>
@@ -113,18 +138,25 @@
 		                    <div class="col-lg-10">
 		                        <ul class="list-group">
 		                            <li class="list-group-item">
-		                                <a href="">${ consultedEmployee.getManager().getNom() } ${ consultedEmployee.getManager().getPrenom() }
-		                                    <span class="badge pull-right">Matricule</span></a>
+		                                <a href="http://localhost:8080/employes/${requestScope.consultedEmployee.getManager().getId()}">
+		                                	${ consultedEmployee.getManager().getNom() } ${ consultedEmployee.getManager().getPrenom() }
+		                                    <span class="badge pull-right">${ requestScope.consultedEmployee.getManager().getMatricule() }</span>
+		                                </a>
 		                            </li>
 		                        </ul>
 		                    </div>
 		                    <div class="col-lg-2">
-		                        <li class="list-group-item"><a href=""><span class="glyphicon glyphicon-remove"></span></a></li>
+		                        <li class="list-group-item">
+		                        	<a href="http://localhost:8080/techniciens/${ requestScope.consultedEmployee.getId() }/removemanager/${ requestScope.consultedEmployee.getId() }">
+		                        		<span class="glyphicon glyphicon-remove"></span>
+		                        	</a>
+		                        </li>
 		                    </div>
 		                 </c:when>
 		                 
 		                 <c:otherwise>
-		                    <form action="" method="get">
+		                    <form action="http://localhost:8080/techniciens/${ requestScope.consultedEmployee.getId() }/addmanager" 
+		                    method="get">
 		                    <div class="col-lg-10">
 		                        <input type="text" name="matricule" value="" placeholder="Ajouter un manager avec le matricule..." class="form-control">
 		                    </div>
@@ -142,7 +174,7 @@
         </div>
                 <div class="col-lg-6">
             <input form="saveForm" class="btn btn-primary" type="submit" value="Enregistrer"/>
-                <a href="" class="btn btn-danger">Supprimer</a>
+                <a href="http://localhost:8080/employes/${ consultedEmployee.getId() }/delete"><button class="btn btn-danger">Supprimer</button></a>
         </div>
     </div>
 </div>

@@ -66,4 +66,12 @@ public class ManagerService {
 		Manager createdManager = managerRepository.save(managerToPersist);
 		return createdManager;
 	}
+
+	public Manager findOne(Long id) {
+		return managerRepository.findOne(id);
+	}
+
+	public Manager updateThisManager(Manager actualManager) {
+		return managerRepository.save(actualManager);
+	}
 }

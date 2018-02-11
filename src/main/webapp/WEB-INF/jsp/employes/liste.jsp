@@ -18,17 +18,40 @@
             </div>
             <table class="table table-hover table-striped">
                 <thead>
-                
                 <tr>
                     <th scope="col">
-                        Matricule <a href=""><span class="glyphicon glyphicon-chevron-up"></span></a>
+                    
+                    	<%-- Affichage des glyphicons UP DOWN si on tri par matricule + composition du lien pour changer la direction de tri / propriété du tri --%>
+                    	<%-- J'ai été obligé d'indenter mon code avec des commentaires, sinon les espaces blancs étaient transmis dans l'URL... Etrange --%>
+                        <a href="employes?page=${ listPageNumber }&size=10&sortProperty=matricule&sortDirection=<c:choose>
+<%-- ---------------------%><c:when test="${ pageSortProperty == 'matricule' && pageSortDirection == 'ASC'}">DESC">Matricule <span class="glyphicon glyphicon-chevron-down"></span></c:when>
+<%-- ---------------------%><c:when test="${pageSortProperty =='matricule' && pageSortDirection == 'DESC'}">ASC">Matricule <span class="glyphicon glyphicon-chevron-up"></span></c:when>								
+<%-- ---------------------%><c:otherwise>ASC">Matricule</c:otherwise>
+						</c:choose></a>                       
                     </th>
+                    
                     <th scope="col">
-                        Nom <a href=""><span class="glyphicon glyphicon-chevron-down"></span></a>
+                    
+                    	<%-- Affichage des glyphicons UP DOWN si on tri par nom + composition du lien pour changer la direction de tri / propriété du tri --%>
+                    	<%-- J'ai été obligé d'indenter mon code avec des commentaires, sinon les espaces blancs étaient transmis dans l'URL... Etrange --%>
+                        <a href="employes?page=${ listPageNumber }&size=10&sortProperty=nom&sortDirection=<c:choose>
+<%-- ---------------------%><c:when test="${ pageSortProperty == 'nom' && pageSortDirection == 'ASC'}">DESC">Nom <span class="glyphicon glyphicon-chevron-down"></span></c:when>
+<%-- ---------------------%><c:when test="${pageSortProperty =='nom' && pageSortDirection == 'DESC'}">ASC">Nom <span class="glyphicon glyphicon-chevron-up"></span></c:when>								
+<%-- ---------------------%><c:otherwise>ASC">Nom</c:otherwise>
+						</c:choose></a>                        
                     </th>
+                    
                     <th scope="col">
-                        <a href="">Prénom</a>
+                    
+                    	<%-- Affichage des glyphicons UP DOWN si on tri par prénom + composition du lien pour changer la direction de tri / propriété du tri --%>
+                    	<%-- J'ai été obligé d'indenter mon code avec des commentaires, sinon les espaces blancs étaient transmis dans l'URL... Etrange --%>
+                        <a href="employes?page=${ listPageNumber }&size=10&sortProperty=prenom&sortDirection=<c:choose>
+<%-- ---------------------%><c:when test="${ pageSortProperty == 'prenom' && pageSortDirection == 'ASC'}">DESC">Prenom <span class="glyphicon glyphicon-chevron-down"></span></c:when>
+<%-- ---------------------%><c:when test="${pageSortProperty =='prenom' && pageSortDirection == 'DESC'}">ASC">Prenom <span class="glyphicon glyphicon-chevron-up"></span></c:when>								
+<%-- ---------------------%><c:otherwise>ASC">Prenom</c:otherwise>
+						</c:choose></a>						
                     </th>
+                    
                     <th scope="col"></th>
                 </tr>
                 </thead>

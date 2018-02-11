@@ -1,6 +1,12 @@
 package com.ipiecoles.java.java320.controller;
 
+import java.io.IOException;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -9,7 +15,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.ipiecoles.java.java320.model.Employe;
+import com.ipiecoles.java.java320.model.Manager;
+import com.ipiecoles.java.java320.model.Technicien;
 import com.ipiecoles.java.java320.service.EmployeService;
+import com.ipiecoles.java.java320.service.ManagerService;
+import com.ipiecoles.java.java320.service.TechnicienService;
 
 
 @Controller
@@ -18,6 +28,12 @@ public class EmployeController {
 	
 	@Autowired
 	private EmployeService employeService;
+	
+	@Autowired
+	private ManagerService managerService;
+	
+	@Autowired
+	private TechnicienService technicienService;
 	
 	/**
 	 * Permet d'accéder au détail d'un employé.
@@ -113,6 +129,37 @@ public class EmployeController {
 		model.put("managerCreationMode", "enabled");
 		model.put("nombreEmployes", employeService.countAllEmploye());
 		return "employes/detail";
+	}
+	
+	/**
+	 * Permet la suppression d'un employe / redirection vers la liste des employés
+	 * 
+	 * @param
+	 * 		id de l'employe a supprimer
+	 * @throws IOException 
+	 *
+	 * */
+	@RequestMapping(value="/{id}/delete", method = RequestMethod.GET)
+	public void deleteThisEmpoye(@PathVariable("id")Long id, Map<String, Object> model, HttpServletResponse response) throws IOException {
+		// Control afin de savoir si l'employe est un manager : si ca en est un
+		// on doit d'abord le désaffecter des techniciens affiliés pour ne pas violer de clef etrangère
+		Manager manager = managerService.findOne(id);
+		if (manager != null) {
+			Set<Technicien> managerTechnicians = manager.getEquipe();
+			Iterator<Technicien> iterator = managerTechnicians.iterator();
+			
+			while(iterator.hasNext()) {
+				Technicien technicien = iterator.next();
+				technicien.setManager(null);
+				technicienService.updateThisTechnicien(technicien);
+			}
+		}
+		
+		employeService.deleteEmploye(id);
+		
+		model.put("nombreEmployes", employeService.countAllEmploye());
+		
+		response.sendRedirect("http://localhost:8080/employes?page=0&size=10&sortProperty=matricule&sortDirection=ASC");
 	}
 	
 	/**

@@ -1,5 +1,6 @@
 package com.ipiecoles.java.java320.service;
 
+import com.ipiecoles.java.java320.model.Commercial;
 import com.ipiecoles.java.java320.model.Manager;
 import com.ipiecoles.java.java320.model.Technicien;
 import com.ipiecoles.java.java320.repository.ManagerRepository;
@@ -46,4 +47,12 @@ public class TechnicienService {
     	Technicien createdTechnicien = technicienRepository.save(technicien);
     	return createdTechnicien;
     }
+
+	public Technicien findById(Long id) {
+		return technicienRepository.findOne(id);
+	}
+
+	public Technicien updateThisTechnicien(Technicien actualTechnicien) {
+		return technicienRepository.save(actualTechnicien);
+	}
 }
