@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +34,17 @@ public class ManagerController {
 	@Autowired
 	private TechnicienService technicienService;
 	
+	/**
+	 * Persiste un nouveau manager en base
+	 * @param model
+	 * @param req pour acceder au formulaire envoyé en post
+	 * 
+	 * @return la jsp index
+	 * @throws IOException 
+	 * */
 	@RequestMapping(value="/save")
-	public String createNewManager(Map<String, Object> model, HttpServletRequest req) {
+	public void createNewManager(Map<String, Object> model, HttpServletRequest req, HttpSession session,
+	HttpServletResponse response) throws IOException {
 		String nom = (String) req.getParameter("nom");
 		String prenom = (String) req.getParameter("prenom");
 		Double salaire = (Double)Double.parseDouble(req.getParameter("salaire"));
@@ -43,13 +53,32 @@ public class ManagerController {
 		
 		Manager managerToPersist = new Manager(nom,prenom,salaire,matricule,dateEmbauche);
 		Manager createdManager = managerService.saveThisManager(managerToPersist);
-		model.put("nombreEmployes", employeService.countAllEmploye());
-		return "index";
+		
+		if(createdManager == null) {
+			model.put("messageErreur", "Impossible de creer ce manager");
+			response.sendRedirect("http://localhost:8080/printerror");			
+		}
+		
+		Long nombreEmployees = (Long)session.getServletContext().getAttribute("nombreEmployes");
+		nombreEmployees++;
+		session.getServletContext().setAttribute("nombreEmployes", nombreEmployees);
+		
+		response.sendRedirect("http://localhost:8080/employes/"+String.valueOf(createdManager.getId()));
 	}
 	
+	/**
+	 * Modifie un manager persisté en base de donné
+	 * 
+	 * @param id 
+	 * 			id du manager a modifier
+	 * 
+	 * @param request, reponse 
+	 * 				request pour recupérer les infos du formulaire
+	 * 				response pour la redirection post modification
+	 * */
 	@RequestMapping(value="/{id}", method = RequestMethod.POST)
-	public void modifyManager(@PathVariable("id") Long id, HttpServletRequest request, HttpServletResponse response, Map<String,Object> model) throws Exception {
-		model.put("nombreEmployes", employeService.countAllEmploye());
+	public void modifyManager(@PathVariable("id") Long id, HttpServletRequest request, HttpServletResponse response,
+	Map<String, Object> model) throws Exception {
 		
 		Manager actualManager = managerService.findOne(id);
 		actualManager.setDateEmbauche(LocalDate.parse(request.getParameter("dateEmbauche")));
@@ -60,13 +89,27 @@ public class ManagerController {
 		
 		Manager modifiedManager = managerService.updateThisManager(actualManager);
 		
+		if(modifiedManager == null) {
+			model.put("messageErreur", "Impossible de modifier ce manager");
+			response.sendRedirect("http://localhost:8080/printerror");			
+		}
+		
 		response.sendRedirect("http://localhost:8080/employes/"+id);
 	}
 	
+	/**
+	 * Ajoute un technicien à l'equipe d'un manager
+	 * 
+	 * @param id 
+	 * 			le manager à ajouter au technicien
+	 * @param matricule
+	 * 					le matricule du technicien concerné
+	 * @param response
+	 * 				pour la redirection dynamique vers la page du manager modifiée
+	 * */
 	@RequestMapping(value="/{id}/addtechnicien", method = RequestMethod.GET)
 	public void addThisManagerATechnician(@PathVariable("id")Long id, 
-	@RequestParam("matricule")String matricule, HttpServletResponse response, 
-	Map<String, Object> model) throws IOException {
+	@RequestParam("matricule")String matricule, HttpServletResponse response) throws IOException {
 		
 		
 		Technicien technicien = (Technicien)employeService.findMyMatricule(matricule);
@@ -75,7 +118,6 @@ public class ManagerController {
 		technicien.setManager(manager);
 		technicienService.updateThisTechnicien(technicien);
 		
-		model.put("nombreEmployes", employeService.countAllEmploye());
 		response.sendRedirect("http://localhost:8080/employes/"+String.valueOf(id));
 	}
 }

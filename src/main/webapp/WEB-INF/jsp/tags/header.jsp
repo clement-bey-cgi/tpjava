@@ -18,7 +18,7 @@
 
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
-                <li class="active"><a href="/employes?page=0&size=10&sortProperty=matricule&sortDirection=ASC" class="nav-link">Liste des employés (${ nombreEmployes })</a></li>
+                <li class="active"><a href="/employes?page=0&size=10&sortProperty=matricule&sortDirection=ASC" class="nav-link">Liste des employés (${ applicationScope.nombreEmployes })</a></li>
             </ul>
 
             <form class="navbar-form navbar-right" role="search" action="/employes/" method="GET">

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -46,7 +47,6 @@ public class EmployeController {
 	 * */
 	@RequestMapping(value="/{id}", method = RequestMethod.GET)
 	public String consultEmployeeInfos(@PathVariable("id")Long id, Map<String, Object> model) {
-		model.put("nombreEmployes", employeService.countAllEmploye());
 		Employe employe = employeService.findById(id);
 		if(employe == null ) {
 			model.put("messageErreur", "Employe Introuvable");
@@ -69,7 +69,6 @@ public class EmployeController {
 	 * */
 	@RequestMapping(value="", method = RequestMethod.GET, params = {"matricule"})
 	public String employeeByMatricule(@RequestParam("matricule")String matricule, Map<String, Object> model) {
-		model.put("nombreEmployes", employeService.countAllEmploye());
 		Employe employe = employeService.findMyMatricule(matricule);
 		if(employe == null ) {
 			model.put("messageErreur", "Employe Introuvable");
@@ -84,11 +83,12 @@ public class EmployeController {
 	/**
 	 * Recupère tous les employés, selon une pagination souhaitée
 	 * 
-	 * @param page le numero de la page souhaitée
-	 * @param size nbre de référence dans la page
-	 * @param sortProperty attribut souhaité pour le tri
-	 * @param sortDirection ASC OU DESC
-	 * @param model le contexte de la requete
+	 * @param page 				le numero de la page souhaitée
+	 * @param size 				nbre de référence dans la page
+	 * @param sortProperty 		attribut souhaité pour le tri
+	 * @param sortDirection 	ASC OU DESC
+	 * @param model 			le contexte de la requete
+	 * @param session			pour le nombre employes
 	 * */
 	@RequestMapping(value="", method = RequestMethod.GET, params = {"page", "size", "sortProperty", "sortDirection"})
 	public 	String findAllEmployees(
@@ -96,8 +96,14 @@ public class EmployeController {
 			@RequestParam("size") Integer size,
 			@RequestParam("sortProperty") String sortProperty,
 			@RequestParam("sortDirection") String sortDirection,
-			Map<String, Object> model) {
-		model.put("nombreEmployes", employeService.countAllEmploye());
+			Map<String, Object> model, HttpSession session) {		
+		
+		// gestion des pages sans résultat
+		if(((Long)session.getServletContext().getAttribute("nombreEmployes") /size) < page || page < 0)  {
+			model.put("messageErreur", "Cette page d'employe n'existe pas !");
+			return "erreur";
+		}
+		
 		Page<Employe> pageEmploye = employeService.findAllEmployes(page, size, sortProperty, sortDirection);
 		model.put("employeeList", pageEmploye.getContent());
 		model.put("listPageNumber", page);
@@ -111,7 +117,6 @@ public class EmployeController {
 	@RequestMapping(value="/new/commercial", method = RequestMethod.GET)
 	public String getCommercialCreationForm(Map<String, Object> model) {
 		model.put("commercialCreationMode", "enabled");
-		model.put("nombreEmployes", employeService.countAllEmploye());
 		return "employes/detail";
 	}
 	
@@ -119,7 +124,6 @@ public class EmployeController {
 	@RequestMapping(value="/new/technicien", method = RequestMethod.GET)
 	public String getTechnicianCreationForm(Map<String, Object> model) {
 		model.put("technicianCreationMode", "enabled");
-		model.put("nombreEmployes", employeService.countAllEmploye());
 		return "employes/detail";
 	}
 	
@@ -127,7 +131,6 @@ public class EmployeController {
 	@RequestMapping(value="/new/manager", method = RequestMethod.GET)
 	public String getManagerCreationForm(Map<String, Object> model) {
 		model.put("managerCreationMode", "enabled");
-		model.put("nombreEmployes", employeService.countAllEmploye());
 		return "employes/detail";
 	}
 	
@@ -140,7 +143,7 @@ public class EmployeController {
 	 *
 	 * */
 	@RequestMapping(value="/{id}/delete", method = RequestMethod.GET)
-	public void deleteThisEmpoye(@PathVariable("id")Long id, Map<String, Object> model, HttpServletResponse response) throws IOException {
+	public void deleteThisEmpoye(@PathVariable("id")Long id, Map<String, Object> model, HttpServletResponse response, HttpSession session) throws IOException {
 		// Control afin de savoir si l'employe est un manager : si ca en est un
 		// on doit d'abord le désaffecter des techniciens affiliés pour ne pas violer de clef etrangère
 		Manager manager = managerService.findOne(id);
@@ -157,14 +160,16 @@ public class EmployeController {
 		
 		employeService.deleteEmploye(id);
 		
-		model.put("nombreEmployes", employeService.countAllEmploye());
+		Long nombreEmployees = (Long)session.getServletContext().getAttribute("nombreEmployes");
+		nombreEmployees--;
+		session.getServletContext().setAttribute("nombreEmployes", nombreEmployees);
 		
 		response.sendRedirect("http://localhost:8080/employes?page=0&size=10&sortProperty=matricule&sortDirection=ASC");
 	}
 	
 	/**
 	 * Configure les critères communs à tous les ecran de consultation employe (detail.jsp)
-	 * @model
+	 * @param model
 	 * 		le scope de la requete, doit contenir un objet Employe avec une clef "consultedEmployee"
 	 * */
 	public Map<String, Object> employeDetailsContextConfiguration(Map<String, Object> model) {

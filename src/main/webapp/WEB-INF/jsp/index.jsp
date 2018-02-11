@@ -2,9 +2,8 @@
 <%@ include file="tags/header.jsp" %>
 <div class="container">
     <div class="jumbotron">
-        <h1>Bienvenue dans l'interface de gestion des <span></span> employés !</h1>
-        <p>Cette application web est paramétrée pour communiquer avec une API REST accessible à l'adresse <code>http://localhost:5367</code>.</p>
-        <p>Il est nécessaire de développer les services webs nécessaires pour que cette application fonctionne. Voici l'ensemble des fonctionnalités :</p>
+        <h1>Bienvenue dans l'interface de gestion des employés !</h1>
+        <p>Cette application web est paramétrée pour communiquer avec une BD MySql accessible à l'adresse <code>http://localhost:3306</code>.</p>
         <ul class="list-group">
             <li class="list-group-item">
                 <h4 class="list-group-item-heading">1 - Compter le nombre d'employés</h4>
@@ -43,12 +42,15 @@
                 <p class="list-group-item-text">Faire la même chose que la question précédente pour les managers. Le chemin de l'API est <code>/managers</code>.</p>
             </li>
             <li class="list-group-item">
-                <h4 class="list-group-item-heading">10 - Ajouter ou supprimer un technicien dans l'équipe d'un manager</h4>
-                <p class="list-group-item-text">En cliquant <a href="/employes/532">ici</a> ou en consultant le détail du manager <em>M00528</em> (id 532), il est possible de supprimer (Appel API <code>GET /managers/532/techniciens/576/delete</code>) un membre de son équipe (ici le technicien d'id 576) avec le bouton <span class="glyphicon glyphicon-remove"></span> et d'ajouter (Appel API <code>GET /managers/532/techniciens/add?matricule=T00110</code>) un membre à l'équipe en renseignant son matricule (dans l'exemple T00110) et en cliquant sur le bouton <span class="glyphicon glyphicon-plus"></span>.</p>
-            </li>
-            <li class="list-group-item">
-                <h4 class="list-group-item-heading">11 - Ajouter ou supprimer un manager à un technicien</h4>
-                <p class="list-group-item-text">En cliquant <a href="/employes/576">ici</a> ou en consultant le détail du technicien <em>T00572</em> (id 576), il est possible de supprimer (GET /techniciens/576/manager/remove) son manager avec le bouton <span class="glyphicon glyphicon-remove"></span> et d'ajouter (Appel API <code>GET /techniciens/576/manager/M00528/add</code>) un manager en renseignant son matricule (dans l'exemple M00528) et en cliquant sur le bouton <span class="glyphicon glyphicon-plus"></span>.</p>
+                <h4 class="list-group-item-heading">10 - EDIT BY CLEMENT BEY : Ajouter ou supprimer un technicien dans l'équipe d'un manager et inversement </h4>
+                <p class="list-group-item-text">  Je me suis permis de modifier légèrement cet ajout / suppression afin de factoriser un peu le code. En effet,
+                j'ai trouvé que faire une méthode dans chaque controller (supprimer un tec d'une equipe manager et supprimer manager d'une equipe technicien) était trop lourd. 
+                D'autant plus qu'en base, c'est le technicien qui est le "propriétaire" de cette relation.<br/><br/>
+              
+                Je propose un modèle de type : <code>/{id}/removemanager/{requestStartId}</code> ou "id" est l'id du technicien dont on veut enlever le manager et ou 
+                "requestStartId" est l'id du technicien / manager dont la supression s'est faite (necessaire pour la redirection qui renvoie à la page d'ou a demarré la requete).<br/><br/>
+                
+                Ainsi je n'ai pu implémenter que 3 méthodes au lieu de 4.</p>
             </li>
         </ul>
     </div>
